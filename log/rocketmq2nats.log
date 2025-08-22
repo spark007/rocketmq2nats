@@ -1,0 +1,5 @@
+{"level":"info","ts":1755827127.4261582,"msg":"init logger success"}
+{"level":"info","ts":1755827127.430314,"msg":"subscribe topic success"}
+{"level":"info","ts":1755827127.43375,"msg":"start consumer success"}
+{"level":"info","ts":1755827170.9599786,"msg":"received interrupt signal, exiting..."}
+{"level":"info","ts":1755827170.960399,"msg":"shutdown consumer success"}

@@ -1,0 +1,13 @@
+nats:
+  host: 127.0.0.1
+  port: 4222
+  clientID: morefine
+  subject: ficc
+rocketmq:
+  host: 172.254.222.46
+  port: 9876
+  groupName: idea-group
+  topicName: ficc
+  maxRetry: 3
+  offset: 2
+  timeout: 15
