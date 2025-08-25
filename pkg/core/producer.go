@@ -42,9 +42,13 @@ func NewNatsProducer(cfg *config.NatsConfig) *NatsProducer {
 
 	p.conn, err = nats.Connect(cfg.Host+":"+strconv.Itoa(cfg.Port),
 		nats.MaxReconnects(3),
-		nats.ReconnectWait(15*time.Second),
+		nats.ReconnectWait(30*time.Second),
+		nats.Timeout(60*time.Second),
 		nats.ReconnectHandler(func(_ *nats.Conn) {
-
+			zap.L().Info("reconnect nats server")
+		}),
+		nats.DisconnectErrHandler(func(_ *nats.Conn, err error) {
+			zap.L().Error("disconnect nats error", zap.String("error", err.Error()))
 		}),
 	)
 	if err != nil {

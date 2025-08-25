@@ -79,7 +79,7 @@ func NewRockerMQConsumer(cfg *config.RocketMQConfig) *RocketMQConsumer {
 		consumer.WithTrace(traceCfg),
 		consumer.WithConsumeFromWhere(consumer.ConsumeFromWhere(cfg.Offset)),
 		consumer.WithConsumeTimeout(time.Second*time.Duration(cfg.Timeout)),
-		consumer.WithMaxReconsumeTimes(cfg.MaxRetry),
+		consumer.WithRetry(cfg.MaxRetry),
 	)
 	if err != nil {
 		zap.L().Error("init consumer error", zap.String("error", err.Error()))

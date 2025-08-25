@@ -13,7 +13,7 @@ type RocketMQConfig struct {
 	Port      int    `yaml:"port"`
 	GroupName string `yaml:"groupName"`
 	TopicName string `yaml:"topicName"`
-	MaxRetry  int32  `yaml:"maxRetry"`
+	MaxRetry  int    `yaml:"maxRetry"`
 	Offset    int    `yaml:"offset"`
 	Timeout   int    `yaml:"timeout"`
 }
@@ -34,7 +34,7 @@ func NewGlobalConfig() *Config {
 		Port:      viper.GetInt("rocketmq.port"),
 		GroupName: viper.GetString("rocketmq.groupName"),
 		TopicName: viper.GetString("rocketmq.topicName"),
-		MaxRetry:  viper.GetInt32("rocketmq.maxRetry"),
+		MaxRetry:  viper.GetInt("rocketmq.maxRetry"),
 		Offset:    viper.GetInt("rocketmq.offset"),
 		Timeout:   viper.GetInt("rocketmq.timeout"),
 	}
