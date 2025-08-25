@@ -12,17 +12,18 @@ import (
 	"time"
 )
 
+type Callback func(context.Context, ...*primitive.MessageExt) (consumer.ConsumeResult, error)
+
 type IConsumer interface {
 	Start()
 	Shutdown()
-	Subscribe()
+	Subscribe(callback Callback)
 	Unsubscribe()
 }
 
 type RocketMQConsumer struct {
 	consumer rocketmq.PushConsumer
 	cfg      *config.RocketMQConfig
-	callback func(context.Context, ...*primitive.MessageExt) (consumer.ConsumeResult, error)
 }
 
 func (c *RocketMQConsumer) Start() {
@@ -40,10 +41,10 @@ func (c *RocketMQConsumer) Shutdown() {
 	zap.L().Info("shutdown consumer success")
 }
 
-func (c *RocketMQConsumer) Subscribe() {
+func (c *RocketMQConsumer) Subscribe(callback Callback) {
 	selector := consumer.MessageSelector{}
 
-	if err := c.consumer.Subscribe("ficc", selector, c.callback); err != nil {
+	if err := c.consumer.Subscribe("ficc", selector, callback); err != nil {
 		zap.L().Error("subscribe topic error", zap.String("error", err.Error()))
 		os.Exit(-1)
 	}
@@ -56,11 +57,9 @@ func (c *RocketMQConsumer) Unsubscribe() {
 	}
 }
 
-func NewRockerMQConsumer(cfg *config.RocketMQConfig,
-	callback func(context.Context, ...*primitive.MessageExt) (consumer.ConsumeResult, error)) *RocketMQConsumer {
+func NewRockerMQConsumer(cfg *config.RocketMQConfig) *RocketMQConsumer {
 	rc := &RocketMQConsumer{
-		cfg:      cfg,
-		callback: callback,
+		cfg: cfg,
 	}
 
 	nameserverResolver := primitive.NewPassthroughResolver([]string{cfg.Host + ":" + strconv.Itoa(cfg.Port)})

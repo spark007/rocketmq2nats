@@ -4,40 +4,30 @@ import (
 	"context"
 	"github.com/apache/rocketmq-client-go/v2/consumer"
 	"github.com/apache/rocketmq-client-go/v2/primitive"
-	"go.uber.org/zap"
-	"os"
-	"os/signal"
 	"rocketmq2nats/pkg/config"
 	"rocketmq2nats/pkg/core"
 	"rocketmq2nats/pkg/log"
-	"syscall"
+	"time"
 )
 
 func main() {
 	log.InitLogger()
 	config.InitConfig()
 
-	globalCfg := config.NewGlobalConfig()
+	ctx, _ := context.WithTimeout(context.Background(), 300*time.Second)
 
-	p := core.NewNatsProducer(globalCfg.NatsCfg)
-	defer p.Shutdown()
-
+	p := core.NewPiper(ctx)
 	callback := func(ctx context.Context, msgs ...*primitive.MessageExt) (consumer.ConsumeResult, error) {
 		//zap.L().Info("consume message", zap.Int("message count", len(msgs)))
 		for _, msg := range msgs {
-			//zap.L().Info("consume message", zap.String("message", string(msg.Body)))
-			go p.Publish(msg.Body)
+			p.ChMsg <- msg.Body
 		}
 		return consumer.ConsumeSuccess, nil
 	}
 
-	c := core.NewRockerMQConsumer(globalCfg.RocketMqCfg, callback)
-	c.Subscribe()
-	c.Start()
-	defer c.Shutdown()
+	go p.Source(callback)
+	go p.Sink()
+	defer p.Shutdown()
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM) // 监听 Ctrl+C 和终止信号
-	<-sigChan                                               // 阻塞直到收到信号
-	zap.L().Info("received interrupt signal, exiting...")
+	<-p.Quit
 }
